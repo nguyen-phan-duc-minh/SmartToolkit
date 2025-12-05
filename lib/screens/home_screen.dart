@@ -3,21 +3,21 @@ import 'package:provider/provider.dart';
 import 'package:smarttoolkit/core/constants/app_constants.dart';
 import 'package:smarttoolkit/core/constants/tools_data.dart';
 import 'package:smarttoolkit/core/services/theme_provider.dart';
-import 'package:smarttoolkit/features/calculator/calculator_screen.dart';
-import 'package:smarttoolkit/features/notes/notes_screen.dart';
-import 'package:smarttoolkit/features/password_generator/password_generator_screen.dart';
-import 'package:smarttoolkit/features/qr_generator/qr_generator_screen.dart';
-import 'package:smarttoolkit/features/tip_calculator/tip_calculator_screen.dart';
-import 'package:smarttoolkit/features/unit_converter/unit_converter_screen.dart';
-import 'package:smarttoolkit/features/age_calculator/age_calculator_screen.dart';
-import 'package:smarttoolkit/features/bmi_calculator/bmi_calculator_screen.dart';
-import 'package:smarttoolkit/features/stopwatch/stopwatch_screen.dart';
-import 'package:smarttoolkit/features/todo_list/todo_list_screen.dart';
-import 'package:smarttoolkit/features/flashlight/flashlight_screen.dart';
-import 'package:smarttoolkit/features/countdown_timer/countdown_timer_screen.dart';
-import 'package:smarttoolkit/features/qr_scanner/qr_scanner_screen.dart';
-import 'package:smarttoolkit/features/image_to_text/image_to_text_screen.dart';
-import 'package:smarttoolkit/features/sound_meter/sound_meter_screen.dart';
+import 'package:smarttoolkit/screens/calculator_screen.dart';
+import 'package:smarttoolkit/screens/notes_screen.dart';
+import 'package:smarttoolkit/screens/password_generator_screen.dart';
+import 'package:smarttoolkit/screens/qr_generator_screen.dart';
+import 'package:smarttoolkit/screens/tip_calculator_screen.dart';
+import 'package:smarttoolkit/screens/unit_converter_screen.dart';
+import 'package:smarttoolkit/screens/age_calculator_screen.dart';
+import 'package:smarttoolkit/screens/bmi_calculator_screen.dart';
+import 'package:smarttoolkit/screens/stopwatch_screen.dart';
+import 'package:smarttoolkit/screens/todo_list_screen.dart';
+import 'package:smarttoolkit/screens/flashlight_screen.dart';
+import 'package:smarttoolkit/screens/countdown_timer_screen.dart';
+import 'package:smarttoolkit/screens/qr_scanner_screen.dart';
+import 'package:smarttoolkit/screens/image_to_text_screen.dart';
+import 'package:smarttoolkit/screens/sound_meter_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -131,19 +131,29 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.defaultPadding,
-                vertical: AppConstants.smallPadding,
-              ),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: AppConstants.smallPadding,
-                mainAxisSpacing: AppConstants.smallPadding,
-                childAspectRatio: 0.95,
-              ),
-              itemCount: filteredTools.length,
-              itemBuilder: (context, index) {
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Responsive grid based on screen width
+                int crossAxisCount = 2;
+                if (constraints.maxWidth > 800) {
+                  crossAxisCount = 4; // Large tablets/desktop
+                } else if (constraints.maxWidth > 600) {
+                  crossAxisCount = 3; // Small tablets
+                }
+                
+                return GridView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.defaultPadding,
+                    vertical: AppConstants.smallPadding,
+                  ),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: AppConstants.smallPadding,
+                    mainAxisSpacing: AppConstants.smallPadding,
+                    childAspectRatio: 0.95,
+                  ),
+                  itemCount: filteredTools.length,
+                  itemBuilder: (context, index) {
                 final tool = filteredTools[index];
                 return Card(
                   child: InkWell(
@@ -190,6 +200,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
+                );
+                  },
                 );
               },
             ),

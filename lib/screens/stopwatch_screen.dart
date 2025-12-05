@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:smarttoolkit/core/services/notification_service.dart';
 
 class StopwatchScreen extends StatefulWidget {
   const StopwatchScreen({super.key});
@@ -18,6 +19,17 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
       setState(() {
         _timeDisplay = _formatTime(_stopwatch.elapsedMilliseconds);
       });
+      
+      // Notify every minute milestone
+      final seconds = _stopwatch.elapsedMilliseconds ~/ 1000;
+      if (seconds > 0 && seconds % 60 == 0 && _stopwatch.elapsedMilliseconds % 1000 < 100) {
+        final minutes = seconds ~/ 60;
+        NotificationService.showNotification(
+          id: 2,
+          title: 'Stopwatch Milestone',
+          body: 'Running for $minutes minute${minutes > 1 ? 's' : ''}!',
+        );
+      }
     });
   }
 

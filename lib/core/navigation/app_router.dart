@@ -1,21 +1,21 @@
 
 import 'package:go_router/go_router.dart';
-import 'package:smarttoolkit/features/home/home_screen.dart';
-import 'package:smarttoolkit/features/calculator/calculator_screen.dart';
-import 'package:smarttoolkit/features/notes/notes_screen.dart';
-import 'package:smarttoolkit/features/password_generator/password_generator_screen.dart';
-import 'package:smarttoolkit/features/qr_generator/qr_generator_screen.dart';
-import 'package:smarttoolkit/features/tip_calculator/tip_calculator_screen.dart';
-import 'package:smarttoolkit/features/unit_converter/unit_converter_screen.dart';
-import 'package:smarttoolkit/features/age_calculator/age_calculator_screen.dart';
-import 'package:smarttoolkit/features/bmi_calculator/bmi_calculator_screen.dart';
-import 'package:smarttoolkit/features/stopwatch/stopwatch_screen.dart';
-import 'package:smarttoolkit/features/todo_list/todo_list_screen.dart';
-import 'package:smarttoolkit/features/flashlight/flashlight_screen.dart';
-import 'package:smarttoolkit/features/countdown_timer/countdown_timer_screen.dart';
-import 'package:smarttoolkit/features/qr_scanner/qr_scanner_screen.dart';
-import 'package:smarttoolkit/features/image_to_text/image_to_text_screen.dart';
-import 'package:smarttoolkit/features/sound_meter/sound_meter_screen.dart';
+import 'package:smarttoolkit/screens/home_screen.dart';
+import 'package:smarttoolkit/screens/calculator_screen.dart';
+import 'package:smarttoolkit/screens/notes_screen.dart';
+import 'package:smarttoolkit/screens/password_generator_screen.dart';
+import 'package:smarttoolkit/screens/qr_generator_screen.dart';
+import 'package:smarttoolkit/screens/tip_calculator_screen.dart';
+import 'package:smarttoolkit/screens/unit_converter_screen.dart';
+import 'package:smarttoolkit/screens/age_calculator_screen.dart';
+import 'package:smarttoolkit/screens/bmi_calculator_screen.dart';
+import 'package:smarttoolkit/screens/stopwatch_screen.dart';
+import 'package:smarttoolkit/screens/todo_list_screen.dart';
+import 'package:smarttoolkit/screens/flashlight_screen.dart';
+import 'package:smarttoolkit/screens/countdown_timer_screen.dart';
+import 'package:smarttoolkit/screens/qr_scanner_screen.dart';
+import 'package:smarttoolkit/screens/image_to_text_screen.dart';
+import 'package:smarttoolkit/screens/sound_meter_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(

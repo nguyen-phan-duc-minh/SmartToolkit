@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smarttoolkit/core/services/storage_service.dart';
 import 'package:smarttoolkit/core/constants/app_constants.dart';
+import 'package:smarttoolkit/core/services/notification_service.dart';
 import 'dart:convert';
 
 class Note {
@@ -334,6 +335,13 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       content: _contentController.text.trim(),
       createdAt: widget.note?.createdAt ?? now,
       updatedAt: now,
+    );
+
+    // Show notification when note is saved
+    NotificationService.showNotification(
+      id: 3,
+      title: 'Note Saved',
+      body: 'Your note "${note.title.isNotEmpty ? note.title : 'Untitled'}" has been saved.',
     );
 
     widget.onSave(note);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smarttoolkit/core/services/notification_service.dart';
 
 class TodoListScreen extends StatefulWidget {
   const TodoListScreen({super.key});
@@ -13,14 +14,22 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   void _addTodo() {
     if (_controller.text.isNotEmpty) {
+      final todoTitle = _controller.text;
       setState(() {
         _todos.add(TodoItem(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          title: _controller.text,
+          title: todoTitle,
           isCompleted: false,
         ));
         _controller.clear();
       });
+      
+      // Show notification when todo is added
+      NotificationService.showNotification(
+        id: 4,
+        title: 'Todo Added',
+        body: 'New task: "$todoTitle" has been added to your list.',
+      );
     }
   }
 
@@ -29,6 +38,15 @@ class _TodoListScreenState extends State<TodoListScreen> {
       final index = _todos.indexWhere((todo) => todo.id == id);
       if (index != -1) {
         _todos[index].isCompleted = !_todos[index].isCompleted;
+        
+        // Show notification when task is completed
+        if (_todos[index].isCompleted) {
+          NotificationService.showNotification(
+            id: 5,
+            title: 'Task Completed!',
+            body: 'Great job! You completed: "${_todos[index].title}"',
+          );
+        }
       }
     });
   }

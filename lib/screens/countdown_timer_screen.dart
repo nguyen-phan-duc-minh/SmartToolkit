@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:smarttoolkit/core/services/notification_service.dart';
 
 class CountdownTimerScreen extends StatefulWidget {
   const CountdownTimerScreen({super.key});
@@ -31,6 +32,14 @@ class _CountdownTimerScreenState extends State<CountdownTimerScreen> {
         setState(() {
           _isRunning = false;
         });
+        
+        // Show notification when timer finishes
+        NotificationService.showNotification(
+          id: 1,
+          title: 'Timer Finished!',
+          body: 'Your countdown timer has reached zero.',
+        );
+        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Timer finished!')),
         );

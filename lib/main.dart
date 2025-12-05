@@ -3,9 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:smarttoolkit/core/theme/app_theme.dart';
 import 'package:smarttoolkit/core/services/theme_provider.dart';
 import 'package:smarttoolkit/core/constants/app_constants.dart';
-import 'package:smarttoolkit/features/home/home_screen.dart';
+import 'package:smarttoolkit/screens/home_screen.dart';
+import 'package:smarttoolkit/core/services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.initialize();
   runApp(const MyApp());
 }
 

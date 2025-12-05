@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:smarttoolkit/core/services/notification_service.dart';
 
 class SoundMeterScreen extends StatefulWidget {
   const SoundMeterScreen({super.key});
@@ -32,6 +33,15 @@ class _SoundMeterScreenState extends State<SoundMeterScreen> {
           _currentDB = simulatedDB;
           if (_currentDB > _maxDB) {
             _maxDB = _currentDB;
+          }
+          
+          // Show notification if sound level is too high
+          if (_currentDB > 75 && _currentDB > _maxDB - 5) {
+            NotificationService.showNotification(
+              id: 6,
+              title: 'High Sound Level Warning',
+              body: 'Sound level is ${_currentDB.toStringAsFixed(1)} dB - Consider protecting your hearing!',
+            );
           }
         });
       });
@@ -107,8 +117,9 @@ class _SoundMeterScreenState extends State<SoundMeterScreen> {
               ),
             ),
             const SizedBox(height: 50),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              spacing: 16,
               children: [
                 ElevatedButton(
                   onPressed: _isListening ? _stopListening : _startListening,
