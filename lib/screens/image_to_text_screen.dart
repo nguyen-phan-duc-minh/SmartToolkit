@@ -634,14 +634,14 @@ class _ImageToTextScreenState extends State<ImageToTextScreen>
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 14),
 
           // Microphone button
           GestureDetector(
             onTap: _isListening ? _stopListening : _startListening,
             child: Container(
-              width: 100,
-              height: 100,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: _isListening ? Colors.red : Colors.blue,
@@ -656,12 +656,13 @@ class _ImageToTextScreenState extends State<ImageToTextScreen>
               ),
               child: Icon(
                 _isListening ? Icons.mic : Icons.mic_none,
-                size: 50,
+                size: 40,
                 color: Colors.white,
               ),
             ),
+
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Text(
             _isListening ? 'Listening...' : 'Tap to speak',
             style: TextStyle(
@@ -670,7 +671,7 @@ class _ImageToTextScreenState extends State<ImageToTextScreen>
               fontWeight: _isListening ? FontWeight.bold : FontWeight.normal,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 14),
 
           // Recognized text
           Card(
