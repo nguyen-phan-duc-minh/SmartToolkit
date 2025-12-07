@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smarttoolkit/core/services/storage_service.dart';
 import 'package:smarttoolkit/core/constants/app_constants.dart';
-import 'package:smarttoolkit/core/services/notification_service.dart';
 import 'dart:convert';
 
 class Note {
@@ -36,6 +35,30 @@ class Note {
   );
 }
 
+class TodoItem {
+  String id;
+  String title;
+  bool isCompleted;
+
+  TodoItem({
+    required this.id,
+    required this.title,
+    required this.isCompleted,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'isCompleted': isCompleted,
+  };
+
+  factory TodoItem.fromJson(Map<String, dynamic> json) => TodoItem(
+    id: json['id'],
+    title: json['title'],
+    isCompleted: json['isCompleted'] ?? false,
+  );
+}
+
 class NotesScreen extends StatefulWidget {
   const NotesScreen({super.key});
 
@@ -43,15 +66,26 @@ class NotesScreen extends StatefulWidget {
   State<NotesScreen> createState() => _NotesScreenState();
 }
 
-class _NotesScreenState extends State<NotesScreen> {
+class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStateMixin {
   List<Note> _notes = [];
+  final List<TodoItem> _todos = [];
   StorageService? _storageService;
   String _searchQuery = '';
+  final TextEditingController _todoController = TextEditingController();
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _initStorage();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _todoController.dispose();
+    super.dispose();
   }
 
   void _initStorage() async {
@@ -139,6 +173,34 @@ class _NotesScreenState extends State<NotesScreen> {
     );
   }
 
+  void _addTodo() {
+    if (_todoController.text.isEmpty) return;
+    
+    setState(() {
+      _todos.add(TodoItem(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: _todoController.text,
+        isCompleted: false,
+      ));
+      _todoController.clear();
+    });
+  }
+
+  void _toggleTodo(String id) {
+    setState(() {
+      final index = _todos.indexWhere((todo) => todo.id == id);
+      if (index != -1) {
+        _todos[index].isCompleted = !_todos[index].isCompleted;
+      }
+    });
+  }
+
+  void _deleteTodo(String id) {
+    setState(() {
+      _todos.removeWhere((todo) => todo.id == id);
+    });
+  }
+
   List<Note> get _filteredNotes {
     if (_searchQuery.isEmpty) return _notes;
     return _notes.where((note) =>
@@ -151,121 +213,221 @@ class _NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notes'),
+        title: const Text('Notes & Todos'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(icon: Icon(Icons.note), text: 'Notes'),
+            Tab(icon: Icon(Icons.checklist), text: 'Todos'),
+          ],
+        ),
       ),
-      body: Column(
+      body: TabBarView(
+        controller: _tabController,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(AppConstants.defaultPadding),
-            child: TextField(
-              decoration: const InputDecoration(
-                hintText: 'Search notes...',
-                prefixIcon: Icon(Icons.search),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-            ),
-          ),
-          Expanded(
-            child: _filteredNotes.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.note_add,
-                          size: 64,
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _searchQuery.isEmpty 
-                              ? 'No notes yet. Create your first note!'
-                              : 'No notes found matching "$_searchQuery"',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(AppConstants.defaultPadding),
-                    itemCount: _filteredNotes.length,
-                    itemBuilder: (context, index) {
-                      final note = _filteredNotes[index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: AppConstants.smallPadding),
-                        child: ListTile(
-                          title: Text(
-                            note.title.isEmpty ? 'Untitled' : note.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                note.content,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Updated ${_formatDate(note.updatedAt)}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Theme.of(context).colorScheme.outline,
-                                ),
-                              ),
-                            ],
-                          ),
-                          onTap: () => _editNote(note),
-                          trailing: PopupMenuButton(
-                            itemBuilder: (context) => [
-                              PopupMenuItem(
-                                value: 'edit',
-                                child: const Row(
-                                  children: [
-                                    Icon(Icons.edit),
-                                    SizedBox(width: 8),
-                                    Text('Edit'),
-                                  ],
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: 'delete',
-                                child: const Row(
-                                  children: [
-                                    Icon(Icons.delete),
-                                    SizedBox(width: 8),
-                                    Text('Delete'),
-                                  ],
-                                ),
-                              ),
-                            ],
-                            onSelected: (value) {
-                              if (value == 'edit') {
-                                _editNote(note);
-                              } else if (value == 'delete') {
-                                _deleteNote(note);
-                              }
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
+          _buildNotesTab(),
+          _buildTodosTab(),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addNote,
-        child: const Icon(Icons.add),
-      ),
+    );
+  }
+
+  Widget _buildNotesTab() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(AppConstants.defaultPadding),
+          child: TextField(
+            decoration: const InputDecoration(
+              hintText: 'Search notes...',
+              prefixIcon: Icon(Icons.search),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+          ),
+        ),
+        Expanded(
+          child: _filteredNotes.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.note_add,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _searchQuery.isEmpty 
+                            ? 'No notes yet.'
+                            : 'No notes found matching "$_searchQuery"',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (_searchQuery.isEmpty)
+                        ElevatedButton.icon(
+                          onPressed: _addNote,
+                          icon: const Icon(Icons.add),
+                          label: const Text('Create Note'),
+                        ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                  itemCount: _filteredNotes.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == _filteredNotes.length) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: ElevatedButton.icon(
+                          onPressed: _addNote,
+                          icon: const Icon(Icons.add),
+                          label: const Text('Create New Note'),
+                        ),
+                      );
+                    }
+                    final note = _filteredNotes[index];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: AppConstants.smallPadding),
+                      child: ListTile(
+                        title: Text(
+                          note.title.isEmpty ? 'Untitled' : note.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              note.content,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Updated ${_formatDate(note.updatedAt)}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                            ),
+                          ],
+                        ),
+                        onTap: () => _editNote(note),
+                        trailing: PopupMenuButton(
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              onTap: () {
+                                Future.delayed(Duration.zero, () => _editNote(note));
+                              },
+                              child: const Row(
+                                children: [
+                                  Icon(Icons.edit),
+                                  SizedBox(width: 8),
+                                  Text('Edit'),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem(
+                              onTap: () {
+                                Future.delayed(Duration.zero, () => _deleteNote(note));
+                              },
+                              child: const Row(
+                                children: [
+                                  Icon(Icons.delete),
+                                  SizedBox(width: 8),
+                                  Text('Delete'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTodosTab() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _todoController,
+                  decoration: const InputDecoration(
+                    hintText: 'Add a new todo...',
+                  ),
+                  onSubmitted: (_) => _addTodo(),
+                ),
+              ),
+              IconButton(
+                onPressed: _addTodo,
+                icon: const Icon(Icons.add),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: _todos.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.checklist,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No todos yet!',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: _todos.length,
+                  itemBuilder: (context, index) {
+                    final todo = _todos[index];
+                    return ListTile(
+                      leading: Checkbox(
+                        value: todo.isCompleted,
+                        onChanged: (_) => _toggleTodo(todo.id),
+                      ),
+                      title: Text(
+                        todo.title,
+                        style: TextStyle(
+                          decoration: todo.isCompleted
+                              ? TextDecoration.lineThrough
+                              : null,
+                        ),
+                      ),
+                      trailing: IconButton(
+                        onPressed: () => _deleteTodo(todo.id),
+                        icon: const Icon(Icons.delete),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 
@@ -337,13 +499,6 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       updatedAt: now,
     );
 
-    // Show notification when note is saved
-    NotificationService.showNotification(
-      id: 3,
-      title: 'Note Saved',
-      body: 'Your note "${note.title.isNotEmpty ? note.title : 'Untitled'}" has been saved.',
-    );
-
     widget.onSave(note);
     setState(() {
       _hasUnsavedChanges = false;
@@ -382,7 +537,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: !_hasUnsavedChanges,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
           _onWillPop();
         }

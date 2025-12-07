@@ -42,8 +42,8 @@ android {
         applicationId = "com.smarttoolkit.app"
         minSdk = flutter.minSdkVersion
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.0.3-beta"
+        versionCode = 7
+        versionName = "1.0.6-beta"
         
         multiDexEnabled = true
     }

@@ -5,19 +5,14 @@ import 'package:smarttoolkit/core/constants/tools_data.dart';
 import 'package:smarttoolkit/core/services/theme_provider.dart';
 import 'package:smarttoolkit/screens/calculator_screen.dart';
 import 'package:smarttoolkit/screens/notes_screen.dart';
-import 'package:smarttoolkit/screens/password_generator_screen.dart';
 import 'package:smarttoolkit/screens/qr_generator_screen.dart';
 import 'package:smarttoolkit/screens/tip_calculator_screen.dart';
 import 'package:smarttoolkit/screens/unit_converter_screen.dart';
-import 'package:smarttoolkit/screens/age_calculator_screen.dart';
-import 'package:smarttoolkit/screens/bmi_calculator_screen.dart';
-import 'package:smarttoolkit/screens/stopwatch_screen.dart';
-import 'package:smarttoolkit/screens/todo_list_screen.dart';
 import 'package:smarttoolkit/screens/flashlight_screen.dart';
 import 'package:smarttoolkit/screens/countdown_timer_screen.dart';
-import 'package:smarttoolkit/screens/qr_scanner_screen.dart';
 import 'package:smarttoolkit/screens/image_to_text_screen.dart';
-import 'package:smarttoolkit/screens/sound_meter_screen.dart';
+import 'package:smarttoolkit/screens/pdf_tools_screen.dart';
+import 'package:smarttoolkit/screens/voice_to_text_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,18 +22,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _searchQuery = '';
-  
-  List<ToolItem> get filteredTools {
-    if (_searchQuery.isEmpty) {
-      return ToolsData.tools;
-    }
-    return ToolsData.tools.where((tool) =>
-        tool.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        tool.description.toLowerCase().contains(_searchQuery.toLowerCase())
-    ).toList();
-  }
-
   void _navigateToTool(String route) {
     Widget screen;
     switch (route) {
@@ -47,9 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
       case '/notes':
         screen = const NotesScreen();
-        break;
-      case '/password-generator':
-        screen = const PasswordGeneratorScreen();
         break;
       case '/qr-generator':
         screen = const QrGeneratorScreen();
@@ -60,32 +40,20 @@ class _HomeScreenState extends State<HomeScreen> {
       case '/unit-converter':
         screen = const UnitConverterScreen();
         break;
-      case '/age-calculator':
-        screen = const AgeCalculatorScreen();
-        break;
-      case '/bmi-calculator':
-        screen = const BmiCalculatorScreen();
-        break;
-      case '/stopwatch':
-        screen = const StopwatchScreen();
-        break;
-      case '/todo-list':
-        screen = const TodoListScreen();
-        break;
       case '/flashlight':
         screen = const FlashlightScreen();
         break;
       case '/countdown-timer':
         screen = const CountdownTimerScreen();
         break;
-      case '/qr-scanner':
-        screen = const QrScannerScreen();
-        break;
       case '/image-to-text':
         screen = const ImageToTextScreen();
         break;
-      case '/sound-meter':
-        screen = const SoundMeterScreen();
+      case '/voice-to-text':
+        screen = const VoiceToTextScreen();
+        break;
+      case '/pdf-tools':
+        screen = const PdfToolsScreen();
         break;
       default:
         return;
@@ -114,47 +82,32 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(AppConstants.defaultPadding),
-            child: TextField(
-              decoration: const InputDecoration(
-                hintText: 'Search tools...',
-                prefixIcon: Icon(Icons.search),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Responsive grid based on screen width
+          int crossAxisCount = 2;
+          if (constraints.maxWidth > 800) {
+            crossAxisCount = 4; // Large tablets/desktop
+          } else if (constraints.maxWidth > 600) {
+            crossAxisCount = 3; // Small tablets
+          }
+          
+          return GridView.builder(
+            padding: const EdgeInsets.only(
+              left: AppConstants.defaultPadding,
+              right: AppConstants.defaultPadding,
+              top: AppConstants.smallPadding,
+              bottom: AppConstants.defaultPadding * 2,
             ),
-          ),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                // Responsive grid based on screen width
-                int crossAxisCount = 2;
-                if (constraints.maxWidth > 800) {
-                  crossAxisCount = 4; // Large tablets/desktop
-                } else if (constraints.maxWidth > 600) {
-                  crossAxisCount = 3; // Small tablets
-                }
-                
-                return GridView.builder(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.defaultPadding,
-                    vertical: AppConstants.smallPadding,
-                  ),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: AppConstants.smallPadding,
-                    mainAxisSpacing: AppConstants.smallPadding,
-                    childAspectRatio: 0.95,
-                  ),
-                  itemCount: filteredTools.length,
-                  itemBuilder: (context, index) {
-                final tool = filteredTools[index];
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: AppConstants.smallPadding,
+              mainAxisSpacing: AppConstants.smallPadding,
+              childAspectRatio: 0.95,
+            ),
+            itemCount: ToolsData.tools.length,
+            itemBuilder: (context, index) {
+              final tool = ToolsData.tools[index];
                 return Card(
                   child: InkWell(
                     onTap: () => _navigateToTool(tool.route),
@@ -189,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Text(
                               tool.description,
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 2,
@@ -201,12 +154,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+            },
+          );
+        },
       ),
     );
   }
