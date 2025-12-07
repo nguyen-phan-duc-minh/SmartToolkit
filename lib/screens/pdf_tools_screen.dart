@@ -6,12 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
-enum ConversionType {
-  pdfToDocx,
-  docxToPdf,
-  imageToPdf,
-  pdfToImage,
-}
+enum ConversionType { pdfToDocx, docxToPdf, imageToPdf, pdfToImage }
 
 class PdfToolsScreen extends StatefulWidget {
   const PdfToolsScreen({super.key});
@@ -20,7 +15,8 @@ class PdfToolsScreen extends StatefulWidget {
   State<PdfToolsScreen> createState() => _PdfToolsScreenState();
 }
 
-class _PdfToolsScreenState extends State<PdfToolsScreen> with SingleTickerProviderStateMixin {
+class _PdfToolsScreenState extends State<PdfToolsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -43,23 +39,14 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> with SingleTickerProvid
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(
-              icon: Icon(Icons.document_scanner),
-              text: 'Scanner',
-            ),
-            Tab(
-              icon: Icon(Icons.sync_alt),
-              text: 'Converter',
-            ),
+            Tab(icon: Icon(Icons.document_scanner), text: 'Scanner'),
+            Tab(icon: Icon(Icons.sync_alt), text: 'Converter'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
-          PdfScannerTab(),
-          PdfConverterTab(),
-        ],
+        children: const [PdfScannerTab(), PdfConverterTab()],
       ),
     );
   }
@@ -73,7 +60,8 @@ class PdfScannerTab extends StatefulWidget {
   State<PdfScannerTab> createState() => _PdfScannerTabState();
 }
 
-class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveClientMixin {
+class _PdfScannerTabState extends State<PdfScannerTab>
+    with AutomaticKeepAliveClientMixin {
   final List<File> _scannedImages = [];
   final ImagePicker _picker = ImagePicker();
   bool _isProcessing = false;
@@ -87,7 +75,7 @@ class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveCl
         source: source,
         imageQuality: 100,
       );
-      
+
       if (image != null && mounted) {
         await _showImagePreviewDialog(File(image.path));
       }
@@ -101,7 +89,7 @@ class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveCl
       final List<XFile> images = await _picker.pickMultiImage(
         imageQuality: 100,
       );
-      
+
       if (images.isNotEmpty) {
         setState(() {
           _scannedImages.addAll(images.map((img) => File(img.path)));
@@ -140,14 +128,12 @@ class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveCl
 
       for (final imageFile in _scannedImages) {
         final image = pw.MemoryImage(imageFile.readAsBytesSync());
-        
+
         pdf.addPage(
           pw.Page(
             pageFormat: PdfPageFormat.a4,
             build: (pw.Context context) {
-              return pw.Center(
-                child: pw.Image(image, fit: pw.BoxFit.contain),
-              );
+              return pw.Center(child: pw.Image(image, fit: pw.BoxFit.contain));
             },
           ),
         );
@@ -158,7 +144,7 @@ class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveCl
       final fileName = 'scan_${DateTime.now().millisecondsSinceEpoch}.pdf';
       final file = File('${output.path}/$fileName');
       await file.writeAsBytes(await pdf.save());
-      
+
       if (mounted) {
         setState(() {
           _isProcessing = false;
@@ -176,10 +162,7 @@ class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveCl
   void _showError(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
@@ -200,8 +183,8 @@ class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveCl
                     Text(
                       'Image Preview',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
@@ -218,10 +201,7 @@ class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveCl
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.file(
-                      imageFile,
-                      fit: BoxFit.contain,
-                    ),
+                    child: Image.file(imageFile, fit: BoxFit.contain),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -271,14 +251,14 @@ class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveCl
     try {
       // Copy to Downloads folder
       final fileName = 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      
+
       // For Android, save to Downloads directory
       if (Platform.isAndroid) {
         final downloadsDir = Directory('/storage/emulated/0/Download');
         if (await downloadsDir.exists()) {
           final newPath = '${downloadsDir.path}/$fileName';
           await imageFile.copy(newPath);
-          
+
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -324,9 +304,9 @@ class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveCl
                 const SizedBox(height: 16),
                 Text(
                   'PDF Created Successfully!',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
@@ -410,7 +390,7 @@ class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveCl
         if (location == null) return;
 
         String? savePath;
-        
+
         if (location == 'downloads') {
           final downloadsDir = Directory('/storage/emulated/0/Download');
           if (await downloadsDir.exists()) {
@@ -431,7 +411,7 @@ class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveCl
 
         if (savePath != null) {
           await pdfFile.copy(savePath);
-          
+
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -546,12 +526,13 @@ class _PdfScannerTabState extends State<PdfScannerTab> with AutomaticKeepAliveCl
                   )
                 : GridView.builder(
                     padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 0.75,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.75,
+                        ),
                     itemCount: _scannedImages.length,
                     itemBuilder: (context, index) {
                       return Card(
@@ -652,7 +633,8 @@ class PdfConverterTab extends StatefulWidget {
   State<PdfConverterTab> createState() => _PdfConverterTabState();
 }
 
-class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAliveClientMixin {
+class _PdfConverterTabState extends State<PdfConverterTab>
+    with AutomaticKeepAliveClientMixin {
   ConversionType _conversionType = ConversionType.pdfToDocx;
   File? _selectedFile;
   bool _isProcessing = false;
@@ -728,7 +710,7 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
 
     try {
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Simulate result
       final resultPath = _selectedFile!.path.replaceAll(
         RegExp(r'\.\w+$'),
@@ -753,7 +735,8 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
 
   Future<void> _showConvertedFileDialog(String filePath) async {
     final fileName = filePath.split('/').last;
-    final fileSize = '${(_selectedFile!.lengthSync() / 1024).toStringAsFixed(2)} KB';
+    final fileSize =
+        '${(_selectedFile!.lengthSync() / 1024).toStringAsFixed(2)} KB';
 
     await showDialog(
       context: context,
@@ -880,22 +863,27 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
       if (directory != null) {
         final fileName = filePath.split('/').last;
         final newPath = '${directory.path}/$fileName';
-        
-        // In real implementation, copy the file here
-        // await File(filePath).copy(newPath);
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('File saved to $location!'),
-              backgroundColor: Colors.green,
-              action: SnackBarAction(
-                label: 'OK',
-                textColor: Colors.white,
-                onPressed: () {},
+
+        // Copy the selected file to the new location
+        if (_selectedFile != null && await _selectedFile!.exists()) {
+          await _selectedFile!.copy(newPath);
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('File saved to $location!\n$newPath'),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 3),
+                action: SnackBarAction(
+                  label: 'OK',
+                  textColor: Colors.white,
+                  onPressed: () {},
+                ),
               ),
-            ),
-          );
+            );
+          }
+        } else {
+          _showError('Source file not found');
         }
       }
     } catch (e) {
@@ -906,26 +894,31 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
   Future<void> _saveToCustomLocation(String filePath) async {
     try {
       String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-      
+
       if (selectedDirectory != null) {
         final fileName = filePath.split('/').last;
         final newPath = '$selectedDirectory/$fileName';
-        
-        // In real implementation, copy the file here
-        // await File(filePath).copy(newPath);
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('File saved to: $selectedDirectory'),
-              backgroundColor: Colors.green,
-              action: SnackBarAction(
-                label: 'OK',
-                textColor: Colors.white,
-                onPressed: () {},
+
+        // Copy the selected file to the custom location
+        if (_selectedFile != null && await _selectedFile!.exists()) {
+          await _selectedFile!.copy(newPath);
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('File saved to:\n$newPath'),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 3),
+                action: SnackBarAction(
+                  label: 'OK',
+                  textColor: Colors.white,
+                  onPressed: () {},
+                ),
               ),
-            ),
-          );
+            );
+          }
+        } else {
+          _showError('Source file not found');
         }
       }
     } catch (e) {
@@ -936,10 +929,7 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
   void _showError(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
@@ -1004,9 +994,9 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
                 const SizedBox(height: 16),
                 Text(
                   'Select Conversion Type',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 _buildBottomSheetOption(
@@ -1075,8 +1065,8 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? colorScheme.primaryContainer 
+                color: isSelected
+                    ? colorScheme.primaryContainer
                     : colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -1084,8 +1074,11 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
                 children: [
                   Icon(fromIcon, size: 20, color: colorScheme.primary),
                   const SizedBox(width: 4),
-                  Icon(Icons.arrow_forward, size: 14, 
-                      color: colorScheme.onSurface.withValues(alpha: 0.5)),
+                  Icon(
+                    Icons.arrow_forward,
+                    size: 14,
+                    color: colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
                   const SizedBox(width: 4),
                   Icon(toIcon, size: 20, color: colorScheme.secondary),
                 ],
@@ -1099,7 +1092,9 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
                   Text(
                     title,
                     style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w600,
                       fontSize: 16,
                       color: isSelected ? colorScheme.primary : null,
                     ),
@@ -1116,11 +1111,7 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
               ),
             ),
             if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: colorScheme.primary,
-                size: 24,
-              ),
+              Icon(Icons.check_circle, color: colorScheme.primary, size: 24),
           ],
         ),
       ),
@@ -1169,7 +1160,9 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
                                 'Conversion Type',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: colorScheme.onSurface.withValues(alpha: 0.6),
+                                  color: colorScheme.onSurface.withValues(
+                                    alpha: 0.6,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -1223,7 +1216,9 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
                           Text(
                             _selectedFile!.path.split('/').last,
                             style: TextStyle(
-                              color: colorScheme.onSurface.withValues(alpha: 0.7),
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -1232,7 +1227,9 @@ class _PdfConverterTabState extends State<PdfConverterTab> with AutomaticKeepAli
                             '${(_selectedFile!.lengthSync() / 1024).toStringAsFixed(2)} KB',
                             style: TextStyle(
                               fontSize: 12,
-                              color: colorScheme.onSurface.withValues(alpha: 0.5),
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 12),
