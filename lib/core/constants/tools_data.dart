@@ -17,13 +17,13 @@ class ToolItem {
 class ToolsData {
   static const List<ToolItem> tools = [
     ToolItem(
-      title: 'Translate Tools',
+      title: 'Image Tools',
       icon: Icons.image_search,
       route: '/image-to-text',
       description: 'Image to text and voice translator',
     ),
     ToolItem(
-      title: 'Voice to Text',
+      title: 'Voice Tools',
       icon: Icons.mic,
       route: '/voice-to-text',
       description: 'Convert speech to text with language selection',

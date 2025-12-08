@@ -434,14 +434,14 @@ class _VoiceToTextScreenState extends State<VoiceToTextScreen>
             ),
           ),
 
-          const SizedBox(height: 22),
+          const SizedBox(height: 12),
 
           // Microphone button
           GestureDetector(
             onTap: _isListening ? _stopListening : _startListening,
             child: Container(
-              width: 100,
-              height: 100,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: _isListening ? colorScheme.error : colorScheme.primary,
@@ -463,7 +463,7 @@ class _VoiceToTextScreenState extends State<VoiceToTextScreen>
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
 
           // Status text
           Text(
@@ -484,7 +484,7 @@ class _VoiceToTextScreenState extends State<VoiceToTextScreen>
             ),
           ],
 
-          const SizedBox(height: 22),
+          const SizedBox(height: 12),
 
           // Recognized text display
           Card(
@@ -667,14 +667,14 @@ class _VoiceToTextScreenState extends State<VoiceToTextScreen>
             ),
           ),
 
-          const SizedBox(height: 22),
+          const SizedBox(height: 12),
 
           // Microphone button
           GestureDetector(
             onTap: _isListeningTranslator ? _stopListeningTranslator : _startListeningTranslator,
             child: Container(
-              width: 100,
-              height: 100,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: _isListeningTranslator ? colorScheme.error : colorScheme.primary,
@@ -696,7 +696,7 @@ class _VoiceToTextScreenState extends State<VoiceToTextScreen>
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
 
           // Status text
           Text(
@@ -717,7 +717,7 @@ class _VoiceToTextScreenState extends State<VoiceToTextScreen>
             ),
           ],
 
-          const SizedBox(height: 22),
+          const SizedBox(height: 12),
 
           // Translation result
           if (_isTranslatingVoice)

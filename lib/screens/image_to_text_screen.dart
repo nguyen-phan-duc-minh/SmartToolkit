@@ -274,7 +274,9 @@ class _ImageToTextScreenState extends State<ImageToTextScreen>
                 ),
               ),
             ),
-          const SizedBox(height: 16),
+
+          const SizedBox(height: 10),
+          
           Row(
             children: [
               Expanded(
@@ -400,7 +402,7 @@ class _ImageToTextScreenState extends State<ImageToTextScreen>
                 ),
               ),
             ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           
           Row(
             children: [
@@ -422,7 +424,7 @@ class _ImageToTextScreenState extends State<ImageToTextScreen>
             ],
           ),
           
-          const SizedBox(height: 24),
+          const SizedBox(height: 14),
           
           if (_isTranslatingImage)
             const CircularProgressIndicator()

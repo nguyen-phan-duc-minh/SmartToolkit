@@ -8,6 +8,7 @@ class AppConstants {
   
   // Storage Keys
   static const String notesKey = 'saved_notes';
+  static const String todosKey = 'saved_todos';
   static const String todoKey = 'todo_items';
   static const String themeKey = 'theme_mode';
   

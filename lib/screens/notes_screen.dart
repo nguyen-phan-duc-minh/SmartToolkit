@@ -73,6 +73,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
   String _searchQuery = '';
   final TextEditingController _todoController = TextEditingController();
   late TabController _tabController;
+  String _sortOrder = 'title_desc'; // title_asc, title_desc, date_asc, date_desc
 
   @override
   void initState() {
@@ -91,6 +92,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
   void _initStorage() async {
     _storageService = await StorageService.getInstance();
     _loadNotes();
+    _loadTodos();
   }
 
   void _loadNotes() {
@@ -103,8 +105,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
         return Note.fromJson(json);
       }).toList();
       
-      // Sort notes by updated date (most recent first)
-      _notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+      _sortNotes();
     });
   }
 
@@ -113,6 +114,26 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
     
     final notesData = _notes.map((note) => jsonEncode(note.toJson())).toList();
     _storageService!.saveStringList(AppConstants.notesKey, notesData);
+  }
+
+  void _loadTodos() {
+    if (_storageService == null) return;
+    
+    final todosData = _storageService!.getStringList(AppConstants.todosKey) ?? [];
+    setState(() {
+      _todos.clear();
+      _todos.addAll(todosData.map((todoJson) {
+        final json = jsonDecode(todoJson);
+        return TodoItem.fromJson(json);
+      }).toList());
+    });
+  }
+
+  void _saveTodos() {
+    if (_storageService == null) return;
+    
+    final todosData = _todos.map((todo) => jsonEncode(todo.toJson())).toList();
+    _storageService!.saveStringList(AppConstants.todosKey, todosData);
   }
 
   void _addNote() {
@@ -138,7 +159,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                   _notes[index] = savedNote;
                 }
               }
-              _notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+              _sortNotes();
             });
             _saveNotes();
           },
@@ -184,6 +205,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
       ));
       _todoController.clear();
     });
+    _saveTodos();
   }
 
   void _toggleTodo(String id) {
@@ -193,12 +215,115 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
         _todos[index].isCompleted = !_todos[index].isCompleted;
       }
     });
+    _saveTodos();
   }
 
   void _deleteTodo(String id) {
     setState(() {
       _todos.removeWhere((todo) => todo.id == id);
     });
+    _saveTodos();
+  }
+
+  void _sortNotes() {
+    switch (_sortOrder) {
+      case 'title_asc':
+        _notes.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+        break;
+      case 'title_desc':
+        _notes.sort((a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()));
+        break;
+      case 'date_asc':
+        _notes.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));
+        break;
+      case 'date_desc':
+        _notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+        break;
+    }
+  }
+
+  void _showSortOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  'Sort By',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.sort_by_alpha),
+                title: const Text('Title (A-Z)'),
+                trailing: _sortOrder == 'title_asc' 
+                    ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+                    : null,
+                selected: _sortOrder == 'title_asc',
+                onTap: () {
+                  setState(() {
+                    _sortOrder = 'title_asc';
+                    _sortNotes();
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.sort_by_alpha),
+                title: const Text('Title (Z-A)'),
+                trailing: _sortOrder == 'title_desc' 
+                    ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+                    : null,
+                selected: _sortOrder == 'title_desc',
+                onTap: () {
+                  setState(() {
+                    _sortOrder = 'title_desc';
+                    _sortNotes();
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.access_time),
+                title: const Text('Date (Oldest First)'),
+                trailing: _sortOrder == 'date_asc' 
+                    ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+                    : null,
+                selected: _sortOrder == 'date_asc',
+                onTap: () {
+                  setState(() {
+                    _sortOrder = 'date_asc';
+                    _sortNotes();
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.access_time),
+                title: const Text('Date (Newest First)'),
+                trailing: _sortOrder == 'date_desc' 
+                    ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+                    : null,
+                selected: _sortOrder == 'date_desc',
+                onTap: () {
+                  setState(() {
+                    _sortOrder = 'date_desc';
+                    _sortNotes();
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   List<Note> get _filteredNotes {
@@ -237,16 +362,28 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
       children: [
         Padding(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
-          child: TextField(
-            decoration: const InputDecoration(
-              hintText: 'Search notes...',
-              prefixIcon: Icon(Icons.search),
-            ),
-            onChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-              });
-            },
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: const InputDecoration(
+                    hintText: 'Search notes...',
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: _showSortOptions,
+                icon: const Icon(Icons.filter_list),
+                tooltip: 'Sort',
+              ),
+            ],
           ),
         ),
         Expanded(
@@ -546,9 +683,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         appBar: AppBar(
           title: Text(widget.note == null ? 'New Note' : 'Edit Note'),
           actions: [
-            TextButton(
+            IconButton(
               onPressed: _saveNote,
-              child: const Text('Save'),
+              icon: const Icon(Icons.check),
+              tooltip: 'Save',
             ),
           ],
         ),

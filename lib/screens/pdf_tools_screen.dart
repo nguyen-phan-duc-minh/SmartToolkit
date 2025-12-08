@@ -853,27 +853,50 @@ class _PdfConverterTabState extends State<PdfConverterTab>
 
   Future<void> _saveToLocation(String filePath, String location) async {
     try {
-      Directory? directory;
-      if (location == 'Downloads') {
-        directory = await getDownloadsDirectory();
+      String? savePath;
+      
+      if (Platform.isAndroid) {
+        if (location == 'Downloads') {
+          final downloadsDir = Directory('/storage/emulated/0/Download');
+          if (!await downloadsDir.exists()) {
+            await downloadsDir.create(recursive: true);
+          }
+          final fileName = filePath.split('/').last;
+          savePath = '${downloadsDir.path}/$fileName';
+        } else {
+          final documentsDir = Directory('/storage/emulated/0/Documents');
+          if (!await documentsDir.exists()) {
+            await documentsDir.create(recursive: true);
+          }
+          final fileName = filePath.split('/').last;
+          savePath = '${documentsDir.path}/$fileName';
+        }
       } else {
-        directory = await getApplicationDocumentsDirectory();
+        // For iOS or other platforms
+        Directory? directory;
+        if (location == 'Downloads') {
+          directory = await getDownloadsDirectory();
+        } else {
+          directory = await getApplicationDocumentsDirectory();
+        }
+        
+        if (directory != null) {
+          final fileName = filePath.split('/').last;
+          savePath = '${directory.path}/$fileName';
+        }
       }
 
-      if (directory != null) {
-        final fileName = filePath.split('/').last;
-        final newPath = '${directory.path}/$fileName';
-
+      if (savePath != null) {
         // Copy the selected file to the new location
         if (_selectedFile != null && await _selectedFile!.exists()) {
-          await _selectedFile!.copy(newPath);
+          await _selectedFile!.copy(savePath);
           
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('File saved to $location!\n$newPath'),
+                content: Text('File saved to $location!\n$savePath'),
                 backgroundColor: Colors.green,
-                duration: const Duration(seconds: 3),
+                duration: const Duration(seconds: 4),
                 action: SnackBarAction(
                   label: 'OK',
                   textColor: Colors.white,
